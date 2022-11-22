@@ -3,9 +3,11 @@ const express = require('express')
 
 
 const app = express()
+let jwt = require('jsonwebtoken');
 
 const port = process.env.PORT || 8000
-const cors = require('cors')
+const cors = require('cors');
+const e = require('express');
 require('dotenv').config()
 
 // middleware 
@@ -22,6 +24,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 //  database collections 
 
 const homeCollection = client.db('airbnbdb').collection('homes')
+const userCollection = client.db('airbnbdb').collection('users')
 
 const dbConnect = async () => {
 
@@ -40,9 +43,38 @@ const dbConnect = async () => {
 }
 dbConnect()
 
+
+// save useremail and generate JWT 
+
+
+app.put('/user/:email', async (req, res) => {
+    const email = req.params.email
+    const user = req.body
+    const filter = { email: email }
+    const options = { upsert: true };
+    const updateDoc = {
+        $set:
+            user
+
+    };
+
+
+
+    const result = await userCollection.updateOne(filter, updateDoc, options);
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: 60 * 60 })
+
+    res.send({ result, token })
+
+
+
+
+
+})
+
 app.get('/', (req, res) => {
     res.send('Server is running')
 })
+
 
 app.listen(port, () => {
     console.log(`server is running on port ${port}`)
