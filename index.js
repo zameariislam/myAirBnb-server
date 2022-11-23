@@ -25,6 +25,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 const homeCollection = client.db('airbnbdb').collection('homes')
 const userCollection = client.db('airbnbdb').collection('users')
+const bookingCollection = client.db('airbnbdb').collection('bookings')
 
 const dbConnect = async () => {
 
@@ -70,6 +71,21 @@ app.put('/user/:email', async (req, res) => {
 
 
 })
+
+// Save a booking 
+
+app.post('/bookings',async(req,res)=>{
+
+    const bookingData=req.body
+    const result = await bookingCollection.insertOne(bookingData);
+    console.log(result)
+    res.send(result)
+
+
+} )
+
+
+
 
 app.get('/', (req, res) => {
     res.send('Server is running')
