@@ -8,6 +8,7 @@ let jwt = require('jsonwebtoken');
 const port = process.env.PORT || 8000
 const cors = require('cors');
 const e = require('express');
+const { query } = require('express');
 require('dotenv').config()
 
 // middleware 
@@ -23,9 +24,10 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 //  database collections 
 
-const homeCollection = client.db('airbnbdb').collection('homes')
+
 const userCollection = client.db('airbnbdb').collection('users')
 const bookingCollection = client.db('airbnbdb').collection('bookings')
+const homeCollection = client.db('airbnbdb').collection('homes')
 
 const dbConnect = async () => {
 
@@ -74,15 +76,77 @@ app.put('/user/:email', async (req, res) => {
 
 // Save a booking 
 
-app.post('/bookings',async(req,res)=>{
+app.post('/bookings', async (req, res) => {
 
-    const bookingData=req.body
+    const bookingData = req.body
     const result = await bookingCollection.insertOne(bookingData);
     console.log(result)
     res.send(result)
 
 
-} )
+})
+
+// get All bookings 
+
+
+app.get('/bookings', async (req, res) => {
+
+    const email = req.query.email
+    let query = {}
+    if (email) {
+        query = { guestEmail: email }
+    }
+    const bookings = await bookingCollection.find(query).toArray();
+    console.log(bookings)
+    res.send(bookings)
+
+
+})
+//  get a single user by email 
+
+
+app.get('/user/:email', async (req, res) => {
+
+    const email = req.params.email
+
+
+    const query = { email: email }
+
+    const user = await userCollection.findOne(query);
+    console.log(user)
+    res.send(user)
+
+
+})
+
+
+//  get all users 
+
+app.get('/users', async (req, res) => {
+
+    
+
+    const users = await userCollection.find().toArray();
+    console.log(users)
+    res.send(users)
+
+
+})
+
+
+// add a home 
+
+
+app.post('/homes', async (req, res) => {
+
+    const homeData = req.body
+    const result = await homeCollection.insertOne(homeData);
+    console.log(result)
+    res.send(result)
+
+
+})
+
 
 
 
